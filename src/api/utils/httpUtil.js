@@ -6,8 +6,9 @@ import axios from 'axios';
 import router from '../../router';
 import store from '../../store/index';
 import baseUrl from '../base';
+import utils from './componentUtil';
 
-import { notification } from 'ant-design-vue';
+
 
 // 环境的切换
 if (process.env.NODE_ENV == 'development') {
@@ -66,7 +67,7 @@ instance.interceptors.response.use(
           break;
         default:
           // 弹框 将结果的message输出
-          tip(res.data.message, "error");
+          utils.tip(res.data.message, "error");
           return res;
       }
     }
@@ -131,49 +132,26 @@ instance.interceptors.response.use(
     // }
     // return Promise.reject(error.response);
     console.error(error);
-    switch (error.response.code) {
-      case -10002:
 
-        // token过期,重新获取后请求
-        // todo 刷新token
+    // 弹框 将结果的message输出
+    utils.tip(error.message, "error");
 
-        // 重新请求
-
-        // 如果返回refreshtoken也过期了, 跳转重新登录
-        break;
-      case -10003:
-        // 权限不足, 需要登录
-        toLogin();
-        break;
-      default:
-        // 弹框 将结果的message输出
-        tip(error.response.message, "error");
-    }
 
     // 处理断网的情况
     // eg:请求超时或断网时，更新state的network状态
     // network状态在app.vue中控制着一个全局的断网提示组件的显示隐藏
     // 关于断网组件中的刷新重新获取数据，会在断网组件中说明
-    if (!window.navigator.onLine) {
-      store.commit('changeNetwork', false);
-    } else {
-      return Promise.reject(error);
-    }
-    return Promise.reject(error);
+    // if (!window.navigator.onLine) {
+    //   store.commit('changeNetwork', false);
+    // } else {
+    //   return Promise.reject(error);
+    // }
+    // return Promise.reject(error);
   }
   // }
 );
 
-/** 
- * 提示函数 
- * 禁止点击蒙层、显示一秒后关闭
- */
-const tip = (msg, type) => {
-  notification[type]({
-    message: msg,
-    showIcon: true
-  });
-};
+
 
 /** 
  * 跳转登录页

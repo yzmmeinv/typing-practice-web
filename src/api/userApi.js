@@ -28,6 +28,9 @@ const userApi = {
   getInfo(params) {
     return axios.post(`/user/getInfo`, params);
   },
+  loginByYzm(params) {
+    return axios.post(`/user/loginByYzm`, params);
+  }
 };
 
 export default userApi;

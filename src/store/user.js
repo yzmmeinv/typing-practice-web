@@ -1,10 +1,11 @@
 import api from '../api/index.js';
 
-export default {
+const ModuleUser = {
   state: {
-    user: null, // 用户的基本信息，可以设置为对象或 null
-    access: null, // 当前用户的 token，可以设置为字符串或 null
-    refresh: null,
+    user: null,// 用户的基本信息，可以设置为对象或 null
+    access: localStorage.getItem('access') || null,// 当前用户的 token，可以设置为字符串或 null
+    refresh: localStorage.getItem('refresh') || null,
+    status: 1,
   },
   getters: {
     getUser(state) {
@@ -31,6 +32,9 @@ export default {
       state.user = null;
       state.access = null;
       state.refresh = null;
+    },
+    setStatus(state, value) {
+      state.status = value;
     }
   },
   actions: {
@@ -58,7 +62,22 @@ export default {
         } else {
           data.error(res);
         }
-
+        // 执行某些操作
+      });
+    },
+    loginByYzm(context, data) {
+      api.userApi.login({
+        email: data.email,
+        password: data.password,
+      }).then(res => {
+        console.log(res);
+        if (res.data.success) {
+          context.commit("setAccess", res.data.access);
+          context.commit("setRefresh", res.data.refresh);
+          data.success();
+        } else {
+          data.error(res);
+        }
         // 执行某些操作
       });
     },
@@ -105,3 +124,4 @@ export default {
     // 可以添加其他模块
   }
 };
+export default ModuleUser;

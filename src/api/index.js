@@ -3,10 +3,12 @@
  */
 // 文章模块接口
 import userApi from '@/api/userApi';
+import baseApi from './baseApi';
 // 其他模块的接口……
- 
+
 // 导出接口
-export default {    
-	userApi,
-	// ……
-}
+export default {
+  userApi,
+  baseApi,
+  // ……
+};
