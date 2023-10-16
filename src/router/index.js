@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import ArticleView from '../views/ArticleView.vue';
 import PracticeView from '../views/PracticeView.vue';
@@ -20,7 +20,12 @@ const routes = [
   {
     path: '/article',
     name: 'article',
-    component: ArticleView
+    component: ArticleView,
+  },
+  {
+    path: "/detail/:articleId", //注意二级路由的路径千万不要加/
+    name: "detail",
+    component: ArticleDetailView,
   },
   {
     path: '/practice',
