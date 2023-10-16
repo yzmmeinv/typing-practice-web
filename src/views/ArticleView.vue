@@ -1,15 +1,26 @@
 <template>
-    <div>这里是文章管理</div>
-  </template>
+  <div class="list">
+    <ArticleSearch />
+    <ArticleList />
+  </div>
+</template>
   
-  <script>
-  
-  export default {
-    name: 'ArticleView',
-    components: {
-    }
+<script>
+import ArticleList from '../components/Article/ArticleList.vue';
+import ArticleSearch from '../components/Article/ArticleSearch.vue';
+export default {
+  name: 'ArticleView',
+  components: {
+    ArticleList,
+    ArticleSearch,
   }
-  </script>
+};
+</script>
   
-  <style scoped>
-  </style>
+<style scoped>
+.list {
+  width: 75%;
+  margin: 5rem auto;
+  border-top: 1px solid #F0F0F0;
+}
+</style>

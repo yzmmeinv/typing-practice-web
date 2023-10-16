@@ -1,4 +1,4 @@
-import { Button, Input, Menu, Grid, Card, Form, Checkbox, Alert, message } from 'ant-design-vue';
+import { Button, Input, Menu, Grid, Card, Form, Checkbox, Alert, message, List, Avatar, Badge, ConfigProvider, Layout, Space, Row, Col, Comment } from 'ant-design-vue';
 
 const components = [
   Button,
@@ -10,6 +10,15 @@ const components = [
   Checkbox,
   Alert,
   message,
+  List,
+  Avatar,
+  Badge,
+  ConfigProvider,
+  Layout,
+  Space,
+  Row,
+  Col,
+  Comment,
 ];
 
 export function setupAntd(app) {
