@@ -2,10 +2,25 @@ import api from '../api/index.js';
 
 const ModuleUser = {
   state: {
-    user: null,// 用户的基本信息，可以设置为对象或 null
+    user: {
+      userId: null,
+      email: "",
+      phone: "",
+      nickName: "",
+      avatar: "",
+      address: "",
+      ip: "",
+      location: "",
+      gender: 1,
+      bio: "",
+      flags: 0,
+      lastLoginTime: "",
+      updateTime: "",
+    },// 用户的基本信息，可以设置为对象或 null
     access: localStorage.getItem('access') || null,// 当前用户的 token，可以设置为字符串或 null
     refresh: localStorage.getItem('refresh') || null,
     status: 1,
+    isLogin: localStorage.getItem('isLogin') || null,
   },
   getters: {
     getUser(state) {
@@ -20,13 +35,16 @@ const ModuleUser = {
   },
   mutations: {
     setUser(state, user) {
-      state.user = user;
+      state.user = user.data;
+      console.log(state.user.avatar);
     },
     setAccess(state, access) {
       state.access = access;
+      localStorage.setItem('access', access);
     },
     setRefresh(state, refresh) {
       state.refresh = refresh;
+      localStorage.setItem('refresh', refresh);
     },
     logout(state) {
       state.user = null;
@@ -35,6 +53,10 @@ const ModuleUser = {
     },
     setStatus(state, value) {
       state.status = value;
+    },
+    setIsLogin(state, value) {
+      state.isLogin = value;
+      localStorage.setItem('isLogin', value);
     }
   },
   actions: {
@@ -54,11 +76,26 @@ const ModuleUser = {
         email: data.email,
         password: data.password,
       }).then(res => {
-        console.log(res);
         if (res.data.success) {
-          context.commit("setAccess", res.data.access);
-          context.commit("setRefresh", res.data.refresh);
+          // 存储数据到localStorage
+          localStorage.setItem('access', res.data.data.access);
+          localStorage.setItem('refresh', res.data.data.refresh);
+          context.commit("setAccess", res.data.data.access);
+          context.commit("setRefresh", res.data.data.refresh);
+          context.commit("setIsLogin", true);
           data.success();
+
+          context.dispatch("getinfo", {
+            // id: data.userId, // 传入用户ID或其他必要参数
+            success: () => {
+              // 在获取用户信息成功后执行的操作
+              console.log("获取用户信息成功");
+            },
+            error: (errorRes) => {
+              // 在获取用户信息失败后执行的操作
+              console.error("获取用户信息失败：", errorRes);
+            }
+          });
         } else {
           data.error(res);
         }
@@ -70,11 +107,24 @@ const ModuleUser = {
         email: data.email,
         password: data.password,
       }).then(res => {
-        console.log(res);
         if (res.data.success) {
-          context.commit("setAccess", res.data.access);
-          context.commit("setRefresh", res.data.refresh);
+          localStorage.setItem('access', res.data.data.access);
+          localStorage.setItem('refresh', res.data.data.refresh);
+          context.commit("setAccess", res.data.data.access);
+          context.commit("setRefresh", res.data.data.refresh);
+          context.commit("setIsLogin", true);
           data.success();
+          context.dispatch("getinfo", {
+            // id: data.userId, // 传入用户ID或其他必要参数
+            success: () => {
+              // 在获取用户信息成功后执行的操作
+              console.log("获取用户信息成功");
+            },
+            error: (errorRes) => {
+              // 在获取用户信息失败后执行的操作
+              console.error("获取用户信息失败：", errorRes);
+            }
+          });
         } else {
           data.error(res);
         }
@@ -82,42 +132,68 @@ const ModuleUser = {
       });
     },
     getinfo(context, data) {
-      api.userApi.getInfo({
+      api.userApi.getInfo()
+        .then(res => {
+          console.log("获取用户信息：", res);
+          if (res.data.success) {
+            context.commit("setUser", res.data);
+            data.success(res);
+          } else {
+            data.error(res);
+          }
+        });
 
+    },
+    logout(context) {
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+      context.commit("logout");
+    },
+    register(context, data) {
+      api.userApi.register({
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        verifyCode: data.code,
       }).then(res => {
         if (res.data.success) {
-          context.commit("setUser", res.data);
-          data.success(res);
+          localStorage.setItem('access', res.data.data.access);
+          localStorage.setItem('refresh', res.data.data.refresh);
+          context.commit("setAccess", res.data.data.access);
+          context.commit("setRefresh", res.data.data.refresh);
+          context.commit("setIsLogin", true);
+          data.success();
+          context.dispatch("getinfo", {
+            // id: data.userId, // 传入用户ID或其他必要参数
+            success: () => {
+              // 在获取用户信息成功后执行的操作
+              console.log("获取用户信息成功");
+            },
+            error: (errorRes) => {
+              // 在获取用户信息失败后执行的操作
+              console.error("获取用户信息失败：", errorRes);
+            }
+          });
         } else {
           data.error(res);
         }
-
+        // 执行某些操作
       });
-      // $.ajax({
-      //   url: "http://127.0.0.1:3000/api/user/account/info/",
-      //   type: "GET",
-      //   headers: {
-      //     'Authorization': "Bearer " + context.state.token,
-      //   },
-      //   success(resp) {
-      //     if (resp.error_message === "success") {
-      //       context.commit("updateUser", {
-      //         ...resp,
-      //         is_login: true,
-      //       });
-      //       data.success(resp);
-      //     } else {
-      //       data.error(resp);
-      //     }
-      //   },
-      //   error(resp) {
-      //     data.error(resp);
-      //   }
-      // });
     },
-    logout(context) {
-      localStorage.removeItem("jwt_token");
-      context.commit("logout");
+    refreshAccess(context, data) {
+      return new Promise((resolve, reject) => {
+        api.userApi.refreshAccess(data.refresh).then(res => {
+          if (res.data.success) {
+            localStorage.setItem('access', res.data.data.access);
+            localStorage.setItem('refresh', res.data.data.refresh);
+            context.commit("setAccess", res.data.data.access);
+            context.commit("setRefresh", res.data.data.refresh);
+            resolve(res); // 刷新成功，将成功的响应传递给调用者
+          } else {
+            reject(res); // 刷新失败，将失败的响应传递给调用者
+          }
+        });
+      });
     },
   },
   modules: {
