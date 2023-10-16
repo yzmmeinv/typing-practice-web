@@ -6,7 +6,9 @@ import TestView from '../views/TestView.vue';
 import ListView from '../views/ListView.vue';
 import OtherView from '../views/OtherView.vue';
 import LoginView from '../views/LoginView.vue';
-import RegisterView from '../views/RegisterView.vue'
+import UserView from '../views/UserView.vue';
+import UserInfo from '../components/User/UserInfo.vue';
+import ArticleDetailView from '../views/ArticleDetailView.vue';
 
 
 const routes = [
@@ -46,15 +48,23 @@ const routes = [
     component: LoginView
   },
   {
-    path: '/register',
-    name: 'register',
-    component: RegisterView
+    path: '/user',
+    name: 'user',
+    component: UserView,
+
+    children: [
+      {
+        path: "/user/info",
+        name: "info",
+        component: UserInfo,
+      },
+    ],
   },
-]
+];
 
 const router = createRouter({
   history: createWebHistory(),
   routes
-})
+});
 
-export default router
+export default router;
