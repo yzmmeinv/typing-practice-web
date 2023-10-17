@@ -37,12 +37,12 @@
         <a-row>
           <a-col :span="1">
             <div class="star">
-              <div>
-                <StarOutlined /> <br>
+              <div @click="toggleStar">
+                <StarOutlined :style="{ color: detail.isPacked ? '#FFB135' : 'inherit' }" /> <br>
                 {{ detail.packs }}
               </div>
-              <div>
-                <LikeOutlined /> <br>
+              <div @click="toggleLike">
+                <LikeOutlined :style="{ color: detail.isStared ? '#F21212' : 'inherit' }" /> <br>
                 {{ detail.stars }}
               </div>
             </div>
@@ -74,18 +74,53 @@
 import { StarOutlined, LikeOutlined } from '@ant-design/icons-vue';
 import ArticleComment from '../components/Article/ArticleComment.vue';
 import { useRoute } from 'vue-router';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import api from '../api';
 
 const route = useRoute();
 const detail = ref({});
 
-if (route.params.articleId) {
-  api.articleApi.desc(route.params.articleId).then(res => {
-    detail.value = res.data.data;
-    console.log(detail.value);
+onMounted(() => {
+  if (route.params.articleId) {
+    api.articleApi.desc(route.params.articleId).then(res => {
+      detail.value = res.data.data;
+      console.log(detail.value);
+    });
+  }
+});
+
+// 切换文章的收藏状态
+const toggleStar = () => {
+  detail.value.isPacked = !detail.value.isPacked;
+  if (detail.value.isPacked) {
+    detail.value.packs++;
+  } else {
+    detail.value.packs--;
+  }
+  // 在这里可以发送收藏请求，将收藏状态同步到服务器
+  const formdata = new FormData();
+  formdata.append("articleId", detail.value.id);
+  api.articleApi.star(formdata).then(res => {
+    console.log(res);
   });
-}
+};
+
+// 切换文章的点赞状态
+const toggleLike = () => {
+  detail.value.isStared = !detail.value.isStared;
+  if (detail.value.isStared) {
+    detail.value.stars++;
+  } else {
+    detail.value.stars--;
+  }
+  // 在这里可以发送点赞请求，将点赞状态同步到服务器
+
+  const formdata = new FormData();
+  formdata.append("articleId", detail.value.id);
+  api.articleApi.like(formdata).then(res => {
+    console.log(res);
+  });
+};
 
 const headerStyle = {
   textAlign: 'initial',
@@ -141,12 +176,15 @@ const footerStyle = {
   flex-direction: column;
   justify-content: center;
   text-align: center;
+  user-select: none;
+  cursor: pointer;
 }
 
 .explain {
   font-size: 12px;
   color: #999;
 }
+
 
 button {
   margin-right: 0.6rem;

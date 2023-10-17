@@ -16,13 +16,13 @@
           <!-- 日期 -->
           {{ item.updateTime }}
           <!-- 收藏图标 -->
-          <span @click="toggleStar(item.id)" style=" user-select:none;">
+          <span @click.stop="toggleStar(item.id)" style=" user-select:none;">
             <component :is="component.star"
               :style="{ marginRight: '8px', color: isStar(item.id) ? '#FFB135' : 'inherit' }" />
             {{ articleStatus[item.id].stars }}
           </span>
           <!-- 点赞图标 -->
-          <span @click="toggleLike(item.id)" style="user-select:none;">
+          <span @click.stop="toggleLike(item.id)" style="user-select:none;">
             <component :is="component.like"
               :style="{ marginRight: '8px', color: isLike(item.id) ? '#F21212' : 'inherit' }" />
             {{ articleStatus[item.id].likes }}
@@ -72,52 +72,38 @@ export default {
 
     const articleStatus = ref({});
 
-    onMounted(() => {
-      console.log('页面挂载完成,触发了onMounted钩子函数');
-      if (store.state.user.isLogin) {
-        api.articleApi.searchOwn({
-          pageSize: pagination.pageSize,
-          pageNo: 1
-        }).then(res => {
-          console.log(res.data.list);
-          listData.value = res.data.list;
-          pagination.total = res.data.total;
-          initLoading.value = false;
-          res.data.list.forEach(article => {
-            // 初始化文章状态字典，将每篇文章的点赞状态设为 false
-            articleStatus.value[article.id] = {
-              isStarred: article.isPacked,
-              isLiked: article.isStared,
-              stars: article.packs,
-              likes: article.stars,
-            };
-          });
+    const searchOwn = (pageSize, pageNo) => {
+      api.articleApi.searchOwn({
+        pageSize: pageSize,
+        pageNo: pageNo
+      }).then(res => {
+        console.log(res.data.list);
+        listData.value = res.data.list;
+        pagination.total = res.data.total;
+        initLoading.value = false;
+        res.data.list.forEach(article => {
+          // 初始化文章状态字典，将每篇文章的点赞状态设为 false
+          articleStatus.value[article.id] = {
+            isStarred: article.isPacked,
+            isLiked: article.isStared,
+            stars: article.packs,
+            likes: article.stars,
+          };
         });
+      });
+    };
+
+    onMounted(() => {
+      if (store.state.user.isLogin) {
+        searchOwn(pagination.pageSize, 1);
       }
     });
+
     const pagination = {
       pageSize: 10,
       total: 0,
       onChange: page => {
-        console.log(page);
-        api.articleApi.searchOwn({
-          pageSize: pagination.pageSize,
-          pageNo: page
-        }).then(res => {
-          console.log(res.data.list);
-          listData.value = res.data.list;
-          pagination.total = res.data.total;
-          initLoading.value = false;
-          res.data.list.forEach(article => {
-            // 初始化文章状态字典，将每篇文章的点赞状态设为 false
-            articleStatus.value[article.id] = {
-              isStarred: article.isPacked,
-              isLiked: article.isStared,
-              stars: article.packs,
-              likes: article.stars,
-            };
-          });
-        });
+        searchOwn(pagination.pageSize, page);
       },
     };
 
@@ -153,7 +139,6 @@ export default {
         console.log(res);
       });
     };
-
     // 判断文章的收藏点赞状态
     const isStar = articleId => articleStatus.value[articleId].isStarred;
     const isLike = articleId => articleStatus.value[articleId].isLiked;
