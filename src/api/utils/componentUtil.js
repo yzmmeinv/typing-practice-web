@@ -11,6 +11,5 @@ const utils = {
       showIcon: true
     });
   },
-
 };
 export default utils;

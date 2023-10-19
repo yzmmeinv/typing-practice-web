@@ -1,7 +1,15 @@
 <template>
-  <div class="list">
-    <ArticleSearch />
-    <ArticleList />
+  <div class="article">
+    <div class="search">
+      <a-card>
+        <ArticleSearch />
+      </a-card>
+    </div>
+    <div class="list">
+      <a-card>
+        <ArticleList />
+      </a-card>
+    </div>
   </div>
 </template>
   
@@ -18,9 +26,18 @@ export default {
 </script>
   
 <style scoped>
+.article {
+  width: 90%;
+  margin: 2rem auto;
+  display: flex;
+}
+
+.search {
+  flex: 1;
+  margin-right: 1rem;
+}
+
 .list {
-  width: 75%;
-  margin: 5rem auto;
-  border-top: 1px solid #F0F0F0;
+  flex: 3;
 }
 </style>
