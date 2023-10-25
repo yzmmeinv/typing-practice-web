@@ -52,6 +52,7 @@
   </a-list>
 </template>
 <script>
+import { useDebounce } from '../../api/utils/debounce';
 import { StarOutlined, LikeOutlined, BarChartOutlined } from '@ant-design/icons-vue';
 import { onMounted, ref } from 'vue';
 import api from '../../api/index.js';
@@ -71,6 +72,8 @@ export default {
     };
 
     const articleStatus = ref({});
+
+    const { debounce } = useDebounce();
 
     const searchOwn = (pageSize, pageNo) => {
       api.articleApi.searchOwn({
@@ -107,8 +110,11 @@ export default {
       },
     };
 
+
     // 切换文章的收藏状态
-    const toggleStar = articleId => {
+    // 创建一个防抖函数，延迟 1000 毫秒
+    const toggleStar = debounce(articleId => {
+      // 在这里执行点击逻辑
       articleStatus.value[articleId].isStarred = !articleStatus.value[articleId].isStarred;
       if (articleStatus.value[articleId].isStarred) {
         articleStatus.value[articleId].stars++;
@@ -121,10 +127,13 @@ export default {
       api.articleApi.star(formdata).then(res => {
         console.log(res);
       });
-    };
+      console.log('按钮被点击了！');
+    }, 1000);
 
     // 切换文章的点赞状态
-    const toggleLike = articleId => {
+    // 创建一个防抖函数，延迟 1000 毫秒
+    const toggleLike = debounce(articleId => {
+      // 在这里执行点击逻辑
       articleStatus.value[articleId].isLiked = !articleStatus.value[articleId].isLiked;
       if (articleStatus.value[articleId].isLiked) {
         articleStatus.value[articleId].likes++;
@@ -132,13 +141,15 @@ export default {
         articleStatus.value[articleId].likes--;
       }
       // 在这里可以发送点赞请求，将点赞状态同步到服务器
-
       const formdata = new FormData();
       formdata.append("articleId", articleId);
       api.articleApi.like(formdata).then(res => {
         console.log(res);
       });
-    };
+      console.log('按钮被点击了！');
+    }, 1000);
+
+
     // 判断文章的收藏点赞状态
     const isStar = articleId => articleStatus.value[articleId].isStarred;
     const isLike = articleId => articleStatus.value[articleId].isLiked;

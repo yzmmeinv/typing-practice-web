@@ -3,7 +3,7 @@
     <a-layout>
       <a-layout-header :style="headerStyle">
         <a-row>
-          <a-col :span="17">
+          <a-col :span="13">
             <span class="title">{{ detail.title }}</span>
           </a-col>
           <a-col :span="7">
@@ -13,7 +13,7 @@
           </a-col>
         </a-row>
         <a-row>
-          <a-col :span="24">
+          <a-col :span="17">
             <div class="info">
               <span>
                 <a-avatar :src="detail.avatar"></a-avatar>
@@ -47,12 +47,12 @@
               </div>
             </div>
           </a-col>
-          <a-col :span="18">
+          <a-col :span="16">
             <p class="height-50">{{ detail.content }}</p>
           </a-col>
         </a-row>
         <a-row>
-          <a-col :span="18" :offset="1">
+          <a-col :span="15" :offset="1">
             <div class="explain">
               声明：以上文章均为用户自行添加，仅供打字交流使用，不代表本站观点，本站不承担任何法律责任，特此声明！如果有侵犯到您的权利，请及时联系我们删除。
             </div>
@@ -61,7 +61,7 @@
       </a-layout-content>
       <a-layout-footer :style="footerStyle">
         <a-row>
-          <a-col :span="20">
+          <a-col :span="17">
             <ArticleComment />
           </a-col>
         </a-row>
@@ -76,9 +76,11 @@ import ArticleComment from '../components/Article/ArticleComment.vue';
 import { useRoute } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import api from '../api';
+import { useDebounce } from '../api/utils/debounce';
 
 const route = useRoute();
 const detail = ref({});
+const { debounce } = useDebounce();
 
 onMounted(() => {
   if (route.params.articleId) {
@@ -89,8 +91,11 @@ onMounted(() => {
   }
 });
 
+
 // 切换文章的收藏状态
-const toggleStar = () => {
+// 创建一个防抖函数，延迟 1000 毫秒
+const toggleStar = debounce(() => {
+  // 在这里执行点击逻辑
   detail.value.isPacked = !detail.value.isPacked;
   if (detail.value.isPacked) {
     detail.value.packs++;
@@ -103,10 +108,12 @@ const toggleStar = () => {
   api.articleApi.star(formdata).then(res => {
     console.log(res);
   });
-};
+  console.log('按钮被点击了！');
+}, 1000);
+
 
 // 切换文章的点赞状态
-const toggleLike = () => {
+const toggleLike = debounce(() => {
   detail.value.isStared = !detail.value.isStared;
   if (detail.value.isStared) {
     detail.value.stars++;
@@ -114,13 +121,13 @@ const toggleLike = () => {
     detail.value.stars--;
   }
   // 在这里可以发送点赞请求，将点赞状态同步到服务器
-
   const formdata = new FormData();
   formdata.append("articleId", detail.value.id);
   api.articleApi.like(formdata).then(res => {
     console.log(res);
   });
-};
+  console.log('按钮被点击了！');
+}, 1000);
 
 const headerStyle = {
   textAlign: 'initial',

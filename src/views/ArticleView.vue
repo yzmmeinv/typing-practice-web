@@ -7,6 +7,7 @@
     </div>
     <div class="list">
       <a-card>
+        <ArticleSort />
         <ArticleList />
       </a-card>
     </div>
@@ -16,11 +17,13 @@
 <script>
 import ArticleList from '../components/Article/ArticleList.vue';
 import ArticleSearch from '../components/Article/ArticleSearch.vue';
+import ArticleSort from '../components/Article/ArticleSort.vue';
 export default {
   name: 'ArticleView',
   components: {
     ArticleList,
     ArticleSearch,
+    ArticleSort
   }
 };
 </script>
