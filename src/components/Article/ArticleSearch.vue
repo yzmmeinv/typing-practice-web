@@ -34,20 +34,29 @@
 
 
 <script setup>
-import { ref } from 'vue';
+import { ref, defineEmits } from 'vue';
 import utils from '../../api/utils/componentUtil';
 import { CloseOutlined } from '@ant-design/icons-vue';
 
 const value = ref('');
-const types = ref(['言情', '爱国', '小说', '歌词']);
+const types = ref(['小说', '散文', '童话', '诗歌', '叙事', '新闻', '哲学', '其他']);
 const languages = ref(['中文', '英语', '韩语', '日语']);
 const selectedType = ref([]);
 const selectedLanguage = ref([]);
 
+const searchData = ref({
+  title: '',
+  language: null,
+  tagMask: [],
+});
 
-const onSearch = searchValue => {
-  console.log('use value', searchValue);
-  console.log('or use this.value', value.value);
+const emit = defineEmits(['searchData']);
+const ziChuanFu = () => {
+  emit('searchData', searchData.value);
+};
+const onSearch = value => {
+  searchData.value.title = value;
+  ziChuanFu();
 };
 
 const selectType = index => {
@@ -56,27 +65,31 @@ const selectType = index => {
       utils.tip('不能重复选择', "warning");
     } else {
       selectedType.value.push(types.value[index]);
+      searchData.value.tagMask.push(index);
+      ziChuanFu();
     }
   } else {
     utils.tip('最多只能选择三个', "warning");
   }
 };
 const selectLanguage = index => {
-  if (selectedLanguage.value.length <= 0) {
-    if (selectedLanguage.value.includes(languages.value[index])) {
-      utils.tip('不能重复选择', "warning");
-    } else {
-      selectedLanguage.value.push(languages.value[index]);
-    }
+  if (selectedLanguage.value.includes(languages.value[index])) {
+    utils.tip('不能重复选择', "warning");
   } else {
-    utils.tip('最多只能选择一个', "warning");
+    selectedLanguage.value.splice(0, 1, languages.value[index]);
+    searchData.value.language = index;
+    ziChuanFu();
   }
 };
-const deleteType = index => {
+const deleteType = (index) => {
   selectedType.value.splice(index, 1);
+  searchData.value.tagMask.splice(index, 1);
+  ziChuanFu();
 };
 const deleteLanguage = index => {
   selectedLanguage.value.splice(index, 1);
+  searchData.value.language = null;
+  ziChuanFu();
 };
 </script>
 

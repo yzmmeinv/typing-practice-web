@@ -24,8 +24,8 @@ const articleApi = {
 
 
   //搜索个人文章
-  searchOwn(params) {
-    return axios.post(`/article/searchOwn`, params);
+  search(params) {
+    return axios.post(`/article/search`, params);
   },
   //收藏文章
   star(params) {

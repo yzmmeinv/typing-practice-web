@@ -51,130 +51,131 @@
     </template>
   </a-list>
 </template>
-<script>
+<script setup>
 import { useDebounce } from '../../api/utils/debounce';
 import { StarOutlined, LikeOutlined, BarChartOutlined } from '@ant-design/icons-vue';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, defineProps, watch } from 'vue';
 import api from '../../api/index.js';
 import { useStore } from 'vuex';
 import router from '../../router';
 
-export default {
-  setup() {
+const searchValue = defineProps({
+  searchValue: Object,
+  sortordData: Number,
+});
+const listData = ref([]);
+const store = useStore();
+const initLoading = ref(true);
+const component = {
+  star: StarOutlined,
+  like: LikeOutlined,
+  bar: BarChartOutlined,
+};
 
-    const listData = ref([]);
-    const store = useStore();
-    const initLoading = ref(true);
-    const component = {
-      star: StarOutlined,
-      like: LikeOutlined,
-      bar: BarChartOutlined,
-    };
+const articleStatus = ref({});
+const { debounce } = useDebounce();
 
-    const articleStatus = ref({});
-
-    const { debounce } = useDebounce();
-
-    const searchOwn = (pageSize, pageNo) => {
-      api.articleApi.searchOwn({
-        pageSize: pageSize,
-        pageNo: pageNo
-      }).then(res => {
-        console.log(res.data.list);
-        listData.value = res.data.list;
-        pagination.total = res.data.total;
-        initLoading.value = false;
-        res.data.list.forEach(article => {
-          // 初始化文章状态字典，将每篇文章的点赞状态设为 false
-          articleStatus.value[article.id] = {
-            isStarred: article.isPacked,
-            isLiked: article.isStared,
-            stars: article.packs,
-            likes: article.stars,
-          };
-        });
-      });
-    };
-
-    onMounted(() => {
-      if (store.state.user.isLogin) {
-        searchOwn(pagination.pageSize, 1);
-      }
+const search = (pageSize, pageNo) => {
+  api.articleApi.search({
+    title: searchValue.searchValue.title,
+    language: searchValue.searchValue.language,
+    tagMask: searchValue.searchValue.tagMask,
+    sortord: searchValue.sortordData || 0,
+    page: {
+      pageSize: pageSize,
+      pageNo: pageNo
+    }
+  }).then(res => {
+    console.log(res.data.list);
+    console.log(searchValue);
+    listData.value = res.data.list;
+    pagination.total = res.data.total;
+    initLoading.value = false;
+    res.data.list.forEach(article => {
+      // 初始化文章状态字典，将每篇文章的点赞状态设为 false
+      articleStatus.value[article.id] = {
+        isStarred: article.isPacked,
+        isLiked: article.isStared,
+        stars: article.packs,
+        likes: article.stars,
+      };
     });
-
-    const pagination = {
-      pageSize: 10,
-      total: 0,
-      onChange: page => {
-        searchOwn(pagination.pageSize, page);
-      },
-    };
-
-
-    // 切换文章的收藏状态
-    // 创建一个防抖函数，延迟 1000 毫秒
-    const toggleStar = debounce(articleId => {
-      // 在这里执行点击逻辑
-      articleStatus.value[articleId].isStarred = !articleStatus.value[articleId].isStarred;
-      if (articleStatus.value[articleId].isStarred) {
-        articleStatus.value[articleId].stars++;
-      } else {
-        articleStatus.value[articleId].stars--;
-      }
-      // 在这里可以发送收藏请求，将收藏状态同步到服务器
-      const formdata = new FormData();
-      formdata.append("articleId", articleId);
-      api.articleApi.star(formdata).then(res => {
-        console.log(res);
-      });
-      console.log('按钮被点击了！');
-    }, 1000);
-
-    // 切换文章的点赞状态
-    // 创建一个防抖函数，延迟 1000 毫秒
-    const toggleLike = debounce(articleId => {
-      // 在这里执行点击逻辑
-      articleStatus.value[articleId].isLiked = !articleStatus.value[articleId].isLiked;
-      if (articleStatus.value[articleId].isLiked) {
-        articleStatus.value[articleId].likes++;
-      } else {
-        articleStatus.value[articleId].likes--;
-      }
-      // 在这里可以发送点赞请求，将点赞状态同步到服务器
-      const formdata = new FormData();
-      formdata.append("articleId", articleId);
-      api.articleApi.like(formdata).then(res => {
-        console.log(res);
-      });
-      console.log('按钮被点击了！');
-    }, 1000);
-
-
-    // 判断文章的收藏点赞状态
-    const isStar = articleId => articleStatus.value[articleId].isStarred;
-    const isLike = articleId => articleStatus.value[articleId].isLiked;
-
-    const routeInfo = (params) => {
-      router.push({
-        name: 'detail',
-        params: {
-          articleId: params,
-        }
-      });
-    };
-    return {
-      listData,
-      pagination,
-      component,
-      initLoading,
-      articleStatus,
-      isStar,
-      isLike,
-      toggleStar,
-      toggleLike,
-      routeInfo,
-    };
+  });
+};
+watch(searchValue, () => {
+  search(pagination.pageSize, 1);
+  console.log(searchValue.searchValue);
+});
+// watch(() => searchValue, value => {
+//   console.log('data', value);
+// }, {
+//   deep: true
+// });
+onMounted(() => {
+  if (store.state.user.isLogin) {
+    search(pagination.pageSize, 1);
   }
+});
+
+const pagination = {
+  pageSize: 10,
+  total: 0,
+  onChange: page => {
+    search(pagination.pageSize, page);
+  },
+};
+
+
+// 切换文章的收藏状态
+// 创建一个防抖函数，延迟 500 毫秒
+const toggleStar = debounce(articleId => {
+  // 在这里执行点击逻辑
+  articleStatus.value[articleId].isStarred = !articleStatus.value[articleId].isStarred;
+  if (articleStatus.value[articleId].isStarred) {
+    articleStatus.value[articleId].stars++;
+  } else {
+    articleStatus.value[articleId].stars--;
+  }
+  // 在这里可以发送收藏请求，将收藏状态同步到服务器
+  const formdata = new FormData();
+  formdata.append("articleId", articleId);
+  api.articleApi.star(formdata).then(res => {
+    console.log(res);
+  });
+  console.log('按钮被点击了！');
+}, 500);
+
+// 切换文章的点赞状态
+// 创建一个防抖函数，延迟500 毫秒
+const toggleLike = debounce(articleId => {
+  // 在这里执行点击逻辑
+  articleStatus.value[articleId].isLiked = !articleStatus.value[articleId].isLiked;
+  if (articleStatus.value[articleId].isLiked) {
+    articleStatus.value[articleId].likes++;
+  } else {
+    articleStatus.value[articleId].likes--;
+  }
+  // 在这里可以发送点赞请求，将点赞状态同步到服务器
+  const formdata = new FormData();
+  formdata.append("articleId", articleId);
+  api.articleApi.like(formdata).then(res => {
+    console.log(res);
+  });
+  console.log('按钮被点击了！');
+}, 500);
+
+
+// 判断文章的收藏点赞状态
+const isStar = articleId => articleStatus.value[articleId].isStarred;
+const isLike = articleId => articleStatus.value[articleId].isLiked;
+
+const routeInfo = (params) => {
+  router.push({
+    name: 'detail',
+    params: {
+      articleId: params,
+    }
+  });
 };
 </script>
 
