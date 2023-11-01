@@ -39,10 +39,15 @@
           <!-- 标题 -->
           <template #title>
             <!-- <a :href="item.href" @click="routeInfo(item.id)">{{ item.title }}</a> -->
-            <router-link :to="{ name: 'detail', params: { articleId: item.id } }">{{ item.title }}</router-link>
-            <a-avatar size="middle" :style="{ backgroundColor: '#609DBF', verticalAlign: 'middle' }">
+            <router-link :to="{ name: 'detail', params: { articleId: item.id } }" @click="view(item.id)">{{
+              item.title }}</router-link>
+            <!-- <a-avatar size="middle" :style="{ backgroundColor: '#609DBF', verticalAlign: 'middle' }">
               {{ item.authorName }}
-            </a-avatar>
+            </a-avatar> -->
+            <span>
+              <a-button>去练习</a-button>
+              <a-button>去比赛</a-button>
+            </span>
           </template>
         </a-list-item-meta>
         <!-- 内容 -->
@@ -169,6 +174,11 @@ const toggleLike = debounce(articleId => {
 const isStar = articleId => articleStatus.value[articleId].isStarred;
 const isLike = articleId => articleStatus.value[articleId].isLiked;
 
+const view = async (id) => {
+  let data = await api.articleApi.view(id);
+  console.log(data);
+};
+
 const routeInfo = (params) => {
   router.push({
     name: 'detail',
@@ -176,6 +186,7 @@ const routeInfo = (params) => {
       articleId: params,
     }
   });
+  view(params);
 };
 </script>
 

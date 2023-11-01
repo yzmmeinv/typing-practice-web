@@ -1,5 +1,5 @@
 <template>
-  <a-input-search v-model:value="value" placeholder="input search text" enter-button @search="onSearch" />
+  <a-input-search v-model:value="value" placeholder="请输入文章标题" enter-button @search="onSearch" />
   <a-card>
     <div>
       <div class="tags">
@@ -30,11 +30,27 @@
       </span>
     </div>
   </a-card>
+  <a-card hoverable @click="handleStarClick" :style="{
+    border: cardStared ? '1px solid #86DDFF' : '',
+    color: cardStared ? '#298AE6' : '',
+  }">
+    <div class="userLike">
+      我的收藏
+    </div>
+  </a-card>
+  <a-card hoverable @click="handleLikeClick" :style="{
+    border: cardLiked ? '1px solid #86DDFF' : '',
+    color: cardLiked ? '#298AE6' : '',
+  }">
+    <div class="userLike">
+      我的点赞
+    </div>
+  </a-card>
 </template>
 
 
 <script setup>
-import { ref, defineEmits } from 'vue';
+import { ref } from 'vue';
 import utils from '../../api/utils/componentUtil';
 import { CloseOutlined } from '@ant-design/icons-vue';
 
@@ -43,6 +59,8 @@ const types = ref(['小说', '散文', '童话', '诗歌', '叙事', '新闻', '
 const languages = ref(['中文', '英语', '韩语', '日语']);
 const selectedType = ref([]);
 const selectedLanguage = ref([]);
+const cardLiked = ref(false);
+const cardStared = ref(false);
 
 const searchData = ref({
   title: '',
@@ -91,6 +109,13 @@ const deleteLanguage = index => {
   searchData.value.language = null;
   ziChuanFu();
 };
+
+const handleStarClick = () => {
+  cardStared.value = !cardStared.value;
+};
+const handleLikeClick = () => {
+  cardLiked.value = !cardLiked.value;
+};
 </script>
 
 <style scoped>
@@ -126,6 +151,11 @@ const deleteLanguage = index => {
 
 .tags .anticon-close {
   margin: 0;
+  padding: 0;
+}
+
+.userLike {
+  text-align: center;
   padding: 0;
 }
 </style>

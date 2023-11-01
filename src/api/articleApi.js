@@ -39,6 +39,10 @@ const articleApi = {
   desc(params) {
     return axios.get(`/article/desc?articleId=${params}`);
   },
+  //增加文章浏览量
+  view(params) {
+    return axios.post(`/article/view?articleId=${params}`);
+  },
 };
 
 export default articleApi;

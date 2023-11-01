@@ -15,9 +15,9 @@
 </template>
   
 <script>
-import ArticleList from '../components/Article/ArticleList.vue';
-import ArticleSearch from '../components/Article/ArticleSearch.vue';
-import ArticleSort from '../components/Article/ArticleSort.vue';
+import ArticleList from '@/components/Article/ArticleList.vue';
+import ArticleSearch from '@/components/Article/ArticleSearch.vue';
+import ArticleSort from '@/components/Article/ArticleSort.vue';
 import { ref } from 'vue';
 export default {
   name: 'ArticleView',

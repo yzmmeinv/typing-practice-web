@@ -1,67 +1,57 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import HomeView from '../views/HomeView.vue';
-import ArticleView from '../views/ArticleView.vue';
-import PracticeView from '../views/PracticeView.vue';
-import TestView from '../views/TestView.vue';
-import ListView from '../views/ListView.vue';
-import OtherView from '../views/OtherView.vue';
-import LoginView from '../views/LoginView.vue';
-import UserView from '../views/UserView.vue';
-import UserInfo from '../components/User/UserInfo.vue';
-import ArticleDetailView from '../views/ArticleDetailView.vue';
 
 
 const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    component: () => import('../views/HomeView.vue')
   },
   {
     path: '/article',
     name: 'article',
-    component: ArticleView,
+    component: () => import('../views/Article/ArticleView.vue'),
   },
   {
     path: "/detail/:articleId", //注意二级路由的路径千万不要加/
     name: "detail",
-    component: ArticleDetailView,
+    component: () => import('../views/Article/ArticleDetailView.vue'),
   },
   {
     path: '/practice',
     name: 'practice',
-    component: PracticeView
+    component: () => import('../views/Practice/PracticeView.vue')
   },
   {
     path: '/test',
     name: 'test',
-    component: TestView
+    component: () => import('../views/TestView.vue')
   },
   {
     path: '/list',
     name: 'list',
-    component: ListView
+    component: () => import('../views/ListView.vue')
   },
   {
     path: '/other',
     name: 'other',
-    component: OtherView
+    component: () => import('../views/OtherView.vue')
   },
   {
     path: '/login',
     name: 'login',
-    component: LoginView
+    component: () => import('../views/LoginView.vue')
   },
   {
     path: '/user',
     name: 'user',
-    component: UserView,
+    component: () => import('../views/User/UserView.vue'),
 
     children: [
       {
         path: "/user/info",
         name: "info",
-        component: UserInfo,
+        component: () => import('../views/User/UserInfo.vue'),
       },
     ],
   },

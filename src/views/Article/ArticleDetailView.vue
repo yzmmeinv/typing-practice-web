@@ -72,11 +72,11 @@
   
 <script setup>
 import { StarOutlined, LikeOutlined } from '@ant-design/icons-vue';
-import ArticleComment from '../components/Article/ArticleComment.vue';
+import ArticleComment from '@/components/Article/ArticleComment.vue';
 import { useRoute } from 'vue-router';
 import { ref, onMounted } from 'vue';
-import api from '../api';
-import { useDebounce } from '../api/utils/debounce';
+import api from '@/api';
+import { useDebounce } from '@/api/utils/debounce';
 
 const route = useRoute();
 const detail = ref({});
