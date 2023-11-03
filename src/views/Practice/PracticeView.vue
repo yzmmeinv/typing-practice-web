@@ -2,9 +2,12 @@
   <div class="beforePractice">
     <BeforePracticeView />
   </div>
-
-  <PracticingView />
-  <AfterPracticeView />
+  <div class="practicing">
+    <PracticingView />
+  </div>
+  <div class="afterPractice">
+    <AfterPracticeView />
+  </div>
 </template>
   
 <script setup>
@@ -17,5 +20,9 @@ import AfterPracticeView from './AfterPracticeView.vue';
 .beforePractice {
   width: 40%;
   margin: 5rem auto;
+}
+
+.practicing {
+  position: relative;
 }
 </style>

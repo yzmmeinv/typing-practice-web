@@ -43,6 +43,10 @@ const articleApi = {
   view(params) {
     return axios.post(`/article/view?articleId=${params}`);
   },
+  //创建文章
+  create(params) {
+    return axios.post(`/article/create`, params);
+  },
 };
 
 export default articleApi;

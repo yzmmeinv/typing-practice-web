@@ -6,7 +6,7 @@
           选择文章：
         </a-col>
         <a-col :span="12">
-          <a-button type="link">点击选择文章</a-button>
+          <a-button type="link" @click="route">{{ articleInfo.articleName }}</a-button>
           <a-button type="dashed">随机选</a-button>
         </a-col>
       </a-row>
@@ -50,12 +50,22 @@
 </template>
   
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
+import router from '@/router/';
+import { useRoute } from 'vue-router';
+
 const inputValue = ref(1);
 const value = ref('模式一');
 const checked = ref(false);
 const addonAfterText = 'min';
 const tip = ref('模式一为行行对照');
+
+const routes = useRoute();
+const articleInfo = reactive({
+  articleId: routes.query.articleId || null,
+  articleName: routes.query.articleName || "点击选择文章",
+});
+
 const options = ref([
   {
     value: 0,
@@ -79,6 +89,12 @@ const handleChange = value => {
   } else if (value === 2) {
     tip.value = '模式三为自由排版且不标出错误';
   }
+};
+
+const route = () => {
+  router.push({
+    name: 'article',
+  });
 };
 </script>
   

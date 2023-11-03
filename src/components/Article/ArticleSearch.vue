@@ -50,7 +50,7 @@
 
 
 <script setup>
-import { ref } from 'vue';
+import { ref, defineEmits } from 'vue';
 import utils from '../../api/utils/componentUtil';
 import { CloseOutlined } from '@ant-design/icons-vue';
 

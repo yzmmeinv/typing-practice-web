@@ -45,7 +45,7 @@
               {{ item.authorName }}
             </a-avatar> -->
             <span>
-              <a-button>去练习</a-button>
+              <a-button @click.stop="routePractice(item.id, item.title)">去练习</a-button>
               <a-button>去比赛</a-button>
             </span>
           </template>
@@ -187,6 +187,18 @@ const routeInfo = (params) => {
     }
   });
   view(params);
+};
+
+
+const routePractice = (id, title) => {
+  console.log(id, title);
+  router.push({
+    name: "practice",
+    query: {
+      articleId: id,
+      articleName: title,
+    }
+  });
 };
 </script>
 
