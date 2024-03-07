@@ -1,12 +1,13 @@
 <template>
-  <a-list item-layout="vertical" size="middle" :pagination="pagination" :data-source="listData" :loading="initLoading">
+  <a-list v-if="listData" item-layout="vertical" size="middle" :pagination="pagination" :data-source="listData.list"
+    :loading="initLoading">
     <template #renderItem="{ item }">
       <a-list-item key="item.title" @click="routeInfo(item.id)">
         <!-- 下方图标 -->
         <template #actions>
           <!-- 文字图标 -->
           <a-avatar size="small" :style="{ backgroundColor: '#7265e6', verticalAlign: 'middle' }">
-            {{ item.language }}
+            {{ getItemNameByCode("articleLanguage", item.language) }}
           </a-avatar>
           <!-- 字数 -->
           <span style="user-select:none;">
@@ -33,7 +34,8 @@
         <a-list-item-meta>
           <template #description>
             <span v-for="text in item.tags" :key="text">
-              {{ text }}
+              {{ getItemNameByCode("articleTag", text) }}
+              <!-- {{ text }} -->
             </span>
           </template>
           <!-- 标题 -->
@@ -45,8 +47,12 @@
               {{ item.authorName }}
             </a-avatar> -->
             <span>
-              <a-button @click.stop="routePractice(item.id, item.title)">去练习</a-button>
+              <a-button @click.stop="routePractice(item.id, item.title, item.language)">去练习</a-button>
               <a-button>去比赛</a-button>
+              <a-button v-if="item.authorId === store.state.user.user.userId"
+                @click.stop="updateArticle(item.id)">编辑文章</a-button>
+              <a-button danger v-if="item.authorId === store.state.user.user.userId"
+                @click.stop="showConfirm(item.id)">删除文章</a-button>
             </span>
           </template>
         </a-list-item-meta>
@@ -55,20 +61,23 @@
       </a-list-item>
     </template>
   </a-list>
+  <UpdataArticle ref="childRef" :updataId="updataId" />
 </template>
 <script setup>
 import { useDebounce } from '../../api/utils/debounce';
-import { StarOutlined, LikeOutlined, BarChartOutlined } from '@ant-design/icons-vue';
-import { onMounted, ref, defineProps, watch } from 'vue';
+import { StarOutlined, LikeOutlined, BarChartOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { ref, defineProps, defineEmits, watch, createVNode } from 'vue';
 import api from '../../api/index.js';
 import { useStore } from 'vuex';
 import router from '../../router';
+import utils from '../../api/utils/componentUtil';
+import getItemNameByCode from '../../api/utils/getItemNameByCode';
+import { Modal } from 'ant-design-vue';
+import UpdataArticle from './UpdataArticle.vue';
 
-const searchValue = defineProps({
-  searchValue: Object,
-  sortordData: Number,
-});
-const listData = ref([]);
+const childRef = ref();
+const props = defineProps(['listData']);
+const listData = ref(props.listData);
 const store = useStore();
 const initLoading = ref(true);
 const component = {
@@ -80,23 +89,14 @@ const component = {
 const articleStatus = ref({});
 const { debounce } = useDebounce();
 
-const search = (pageSize, pageNo) => {
-  api.articleApi.search({
-    title: searchValue.searchValue.title,
-    language: searchValue.searchValue.language,
-    tagMask: searchValue.searchValue.tagMask,
-    sortord: searchValue.sortordData || 0,
-    page: {
-      pageSize: pageSize,
-      pageNo: pageNo
-    }
-  }).then(res => {
-    console.log(res.data.list);
-    console.log(searchValue);
-    listData.value = res.data.list;
-    pagination.total = res.data.total;
+watch(() => props.listData, (newListData) => {
+  console.log(newListData);
+  if (newListData) {
+    listData.value = newListData;
+    //执行你的逻辑;
+    pagination.total = listData.value.total;
     initLoading.value = false;
-    res.data.list.forEach(article => {
+    listData.value.list.forEach(article => {
       // 初始化文章状态字典，将每篇文章的点赞状态设为 false
       articleStatus.value[article.id] = {
         isStarred: article.isPacked,
@@ -105,31 +105,32 @@ const search = (pageSize, pageNo) => {
         likes: article.stars,
       };
     });
-  });
-};
-watch(searchValue, () => {
-  search(pagination.pageSize, 1);
-  console.log(searchValue.searchValue);
-});
-// watch(() => searchValue, value => {
-//   console.log('data', value);
-// }, {
-//   deep: true
-// });
-onMounted(() => {
-  if (store.state.user.isLogin) {
-    search(pagination.pageSize, 1);
+  } else {
+    utils.tip('无数据', "error");
   }
 });
 
 const pagination = {
   pageSize: 10,
   total: 0,
+  page: 1,
   onChange: page => {
-    search(pagination.pageSize, page);
+    pageData.value.page = page;
+    ziChuanFu();
   },
 };
-
+const pageData = ref({
+  pageSize: pagination.pageSize,
+  total: pagination.total,
+  page: pagination.page,
+});
+const emit = defineEmits(['pageData']);
+const ziChuanFu = () => {
+  emit('pageData', pageData.value);
+};
+if (store.state.user.isLogin) {
+  ziChuanFu();
+}
 
 // 切换文章的收藏状态
 // 创建一个防抖函数，延迟 500 毫秒
@@ -142,9 +143,7 @@ const toggleStar = debounce(articleId => {
     articleStatus.value[articleId].stars--;
   }
   // 在这里可以发送收藏请求，将收藏状态同步到服务器
-  const formdata = new FormData();
-  formdata.append("articleId", articleId);
-  api.articleApi.star(formdata).then(res => {
+  api.articleApi.star(articleId).then(res => {
     console.log(res);
   });
   console.log('按钮被点击了！');
@@ -161,9 +160,7 @@ const toggleLike = debounce(articleId => {
     articleStatus.value[articleId].likes--;
   }
   // 在这里可以发送点赞请求，将点赞状态同步到服务器
-  const formdata = new FormData();
-  formdata.append("articleId", articleId);
-  api.articleApi.like(formdata).then(res => {
+  api.articleApi.like(articleId).then(res => {
     console.log(res);
   });
   console.log('按钮被点击了！');
@@ -190,21 +187,52 @@ const routeInfo = (params) => {
 };
 
 
-const routePractice = (id, title) => {
+const routePractice = (id, title, language) => {
   console.log(id, title);
   router.push({
     name: "practice",
     query: {
       articleId: id,
       articleName: title,
+      articleLanguage: language,
     }
   });
+};
+
+const showConfirm = (id) => {
+  Modal.confirm({
+    title: '是否删除文章?',
+    icon: createVNode(ExclamationCircleOutlined),
+    content: '是否要删除文章，删除文章后不可恢复',
+    onOk() {
+      del(id);
+    },
+  });
+};
+
+const del = (id) => {
+  api.articleApi.delete(id).then(res => {
+    if (res.data.success) {
+      setTimeout(() => {
+        utils.tip('删除成功', "success");
+      }, 200);
+      setTimeout(() => {
+        router.go(0);
+      }, 900); // 延迟1秒后刷新页面
+    }
+  });
+};
+const updataId = ref();
+const updateArticle = (id) => {
+  childRef.value.showDrawer();
+  updataId.value = id;
 };
 </script>
 
 <style scoped>
 :where(.css-dev-only-do-not-override-hkh161).ant-list-vertical .ant-list-item .ant-list-item-meta {
   margin-block-end: 0;
+  align-items: center;
 }
 
 .ant-list-item-meta-title a:nth-child(1) {
@@ -222,24 +250,24 @@ const routePractice = (id, title) => {
   margin-bottom: 10px;
 }
 
-:where(.css-dev-only-do-not-override-hkh161).ant-list .ant-list-item .ant-list-item-meta {
-  align-items: center;
-}
-
 .ant-list-item .ant-list-item-meta .ant-list-item-meta-title span {
   float: right;
 }
 
 .ant-list-item:hover {
-  transform: scale(1.03);
-  transform-origin: left;
-  transition: all 0.5s ease 0s;
-  -webkit-transform: scale(1.03);
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease 0s;
+  box-shadow: 5px 7px 10px rgba(0, 0, 0, 0.2);
   cursor: pointer;
 }
 
 :where(.css-dev-only-do-not-override-hkh161).ant-list-split .ant-list-item {
   padding-top: 0;
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  border-radius: 20px;
+  margin-top: 10px;
+}
+
+:where(.css-dev-only-do-not-override-hkh161).ant-list {
+  margin-top: 10px;
 }
 </style>

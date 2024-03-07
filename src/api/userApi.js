@@ -50,7 +50,11 @@ const userApi = {
   // 刷新access
   refreshAccess() {
     return axios.post('/user/refresh', {}, { headers: { 'REFRESH': store.state.user.refresh } });
-  }
+  },
+  //修改个人信息
+  updateInfo(params) {
+    return axios.post(`/user/updateOwn`, params);
+  },
 };
 
 export default userApi;

@@ -1,13 +1,14 @@
 import api from '../api/index.js';
+import router from '../router/index.js';
 
 const ModuleUser = {
   state: {
-    user: {
+    user: JSON.parse(localStorage.getItem('user')) || {
       userId: null,
       email: "",
       phone: "",
       nickName: "",
-      avatar: "",
+      avatar: "4",
       address: "",
       ip: "",
       location: "",
@@ -20,7 +21,7 @@ const ModuleUser = {
     access: localStorage.getItem('access') || null,// 当前用户的 token，可以设置为字符串或 null
     refresh: localStorage.getItem('refresh') || null,
     status: 1,
-    isLogin: localStorage.getItem('isLogin') || null,
+    isLogin: JSON.parse(localStorage.getItem('isLogin')) || false,
   },
   getters: {
     getUser(state) {
@@ -47,7 +48,21 @@ const ModuleUser = {
       localStorage.setItem('refresh', refresh);
     },
     logout(state) {
-      state.user = null;
+      state.user = {
+        userId: null,
+        email: "",
+        phone: "",
+        nickName: "",
+        avatar: "",
+        address: "",
+        ip: "",
+        location: "",
+        gender: 1,
+        bio: "",
+        flags: 0,
+        lastLoginTime: "",
+        updateTime: "",
+      };
       state.access = null;
       state.refresh = null;
     },
@@ -57,7 +72,7 @@ const ModuleUser = {
     setIsLogin(state, value) {
       state.isLogin = value;
       localStorage.setItem('isLogin', value);
-    }
+    },
   },
   actions: {
     // 在 actions 中可以定义一些异步操作，例如获取用户信息并调用 mutations 中的方法进行状态更新
@@ -137,6 +152,7 @@ const ModuleUser = {
           console.log("获取用户信息：", res);
           if (res.data.success) {
             context.commit("setUser", res.data);
+            localStorage.setItem('user', JSON.stringify(res.data.data));
             data.success(res);
           } else {
             data.error(res);
@@ -147,7 +163,9 @@ const ModuleUser = {
     logout(context) {
       localStorage.removeItem("access");
       localStorage.removeItem("refresh");
+      localStorage.removeItem("user");
       context.commit("logout");
+      context.commit("setIsLogin", false);
     },
     register(context, data) {
       api.userApi.register({
@@ -181,19 +199,26 @@ const ModuleUser = {
       });
     },
     refreshAccess(context, data) {
-      return new Promise((resolve, reject) => {
-        api.userApi.refreshAccess(data.refresh).then(res => {
-          if (res.data.success) {
-            localStorage.setItem('access', res.data.data.access);
-            localStorage.setItem('refresh', res.data.data.refresh);
-            context.commit("setAccess", res.data.data.access);
-            context.commit("setRefresh", res.data.data.refresh);
-            resolve(res); // 刷新成功，将成功的响应传递给调用者
-          } else {
-            reject(res); // 刷新失败，将失败的响应传递给调用者
-          }
-        });
+
+      // new Promise((resolve, reject) => {
+      return api.userApi.refreshAccess(data.refresh).then(res => {
+        if (res.data.success) {
+          localStorage.setItem('access', res.data.data.access);
+          localStorage.setItem('refresh', res.data.data.refresh);
+          context.commit("setAccess", res.data.data.access);
+          context.commit("setRefresh", res.data.data.refresh);
+          // resolve(res); // 刷新成功，将成功的响应传递给调用者
+        } else {
+          // reject(res); // 刷新失败，将失败的响应传递给调用者
+          // 执行logout
+          // 跳到登录页
+          context.dispatch("logout");
+          router.push({
+            path: '/login'
+          });
+        }
       });
+      // });
     },
   },
   modules: {

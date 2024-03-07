@@ -7,7 +7,8 @@
         </a-col>
         <a-col :span="12">
           <a-button type="link" @click="route">{{ articleInfo.articleName }}</a-button>
-          <a-button type="dashed">随机选</a-button>
+          <span>{{ getItemNameByCode("articleLanguage", articleInfo.articleLanguage) }}</span>
+          <a-button type="dashed" @click="random">随机选</a-button>
         </a-col>
       </a-row>
     </div>
@@ -44,49 +45,66 @@
       </a-row>
     </div>
     <div class="button">
-      <a-button type="primary">开始练习</a-button>
+      <a-button type="primary" @click="init">开始练习</a-button>
     </div>
   </a-card>
 </template>
   
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, defineEmits } from 'vue';
 import router from '@/router/';
 import { useRoute } from 'vue-router';
+import api from '@/api/index.js';
+import utils from '../../api/utils/componentUtil';
+import getItemNameByCode from '../../api/utils/getItemNameByCode';
 
 const inputValue = ref(1);
 const value = ref('模式一');
 const checked = ref(false);
 const addonAfterText = 'min';
 const tip = ref('模式一为行行对照');
+const currentOption = ref(1);
+const emit = defineEmits(['beforePracticeInfo']);
 
 const routes = useRoute();
 const articleInfo = reactive({
   articleId: routes.query.articleId || null,
   articleName: routes.query.articleName || "点击选择文章",
+  articleLanguage: routes.query.articleLanguage || null,
 });
+
+const random = () => {
+  api.practiceApi.random().then(res => {
+    if (res.data.data) {
+      articleInfo.articleId = JSON.parse(res.data.data).id;
+      articleInfo.articleName = JSON.parse(res.data.data).title;
+      articleInfo.articleLanguage = JSON.parse(res.data.data).language;
+    }
+  });
+};
 
 const options = ref([
   {
-    value: 0,
+    value: 1,
     label: '模式一',
   },
   {
-    value: 1,
+    value: 2,
     label: '模式二',
   },
   {
-    value: 2,
+    value: 3,
     label: '模式三',
   },
 ]);
 const handleChange = value => {
-  console.log(value); // { key: "lucy", label: "Lucy (101)" }
-  if (value === 0) {
+  // { key: "lucy", label: "Lucy (101)" }
+  currentOption.value = value;
+  if (value === 1) {
     tip.value = '模式一为行行对照';
-  } else if (value === 1) {
-    tip.value = '模式二为自由排版且标出错误';
   } else if (value === 2) {
+    tip.value = '模式二为自由排版且标出错误';
+  } else if (value === 3) {
     tip.value = '模式三为自由排版且不标出错误';
   }
 };
@@ -95,6 +113,31 @@ const route = () => {
   router.push({
     name: 'article',
   });
+};
+
+const init = () => {
+  if (checked.value) {
+    inputValue.value = -1;
+  }
+  if (articleInfo.articleId && currentOption.value && inputValue.value) {
+    api.practiceApi.init({
+      articleId: articleInfo.articleId,
+      mode: currentOption.value,
+      selectedTimeRange: inputValue.value === -1 ? inputValue.value : inputValue.value * 60,
+    }).then(res => {
+      emit('beforePracticeInfo', {
+        status: 1,
+        practiceInfo: {
+          articleId: articleInfo.articleId,
+          mode: currentOption.value,
+          selectedTimeRange: inputValue.value,
+          practiceId: res.data.data.id
+        },
+      });
+    });
+  } else {
+    utils.tip("请选择必填项", "error");
+  }
 };
 </script>
   
@@ -123,5 +166,13 @@ const route = () => {
   line-height: 2rem;
   color: #999;
   font-size: 12px;
+}
+
+:where(.css-dev-only-do-not-override-hkh161).ant-btn-link {
+  padding-left: 0;
+}
+
+:where(.css-dev-only-do-not-override-hkh161).ant-btn-dashed {
+  margin-left: 10px;
 }
 </style>

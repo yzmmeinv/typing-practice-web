@@ -1,14 +1,8 @@
 <template>
-  <span>排列方式：</span>
-  <a-space>
-    <a-select ref="select" v-model:value="value" style="width: 120px" :options="options1"
-      @change="handleChange"></a-select>
-  </a-space>
-  <a-button type="primary" @click="showDrawer">创建文章</a-button>
-  <a-drawer :width="500" title="创建文章" :open="open" @close="onClose">
+  <a-drawer :width="500" title="编辑文章" :open="open" @close="onClose">
     <template #extra>
       <a-button style="margin-right: 8px" @click="onClose">关闭</a-button>
-      <a-button type="primary" @click="submit">创建</a-button>
+      <a-button type="primary" @click="submit">保存</a-button>
     </template>
 
     <a-form :model="form" layout="vertical" :rules="rules">
@@ -62,7 +56,7 @@
   </a-drawer>
 </template>
 <script setup>
-import { ref, defineEmits, computed, createVNode } from 'vue';
+import { ref, computed, createVNode, defineExpose, defineProps, watch } from 'vue';
 import api from '../../api';
 import utils from '@/api/utils/componentUtil';
 import router from '../../router';
@@ -70,6 +64,27 @@ import { useStore } from 'vuex';
 import { Modal } from 'ant-design-vue';
 
 const store = useStore();
+const props = defineProps(['updataId']);
+const updateId = ref(props.updataId);
+const detail = ref();
+
+watch(() => props.updataId, (newListData) => {
+  if (newListData) {
+    updateId.value = newListData;
+    form.value.id = newListData;
+    //执行你的逻辑;
+    api.articleApi.desc(updateId.value).then(res => {
+      detail.value = res.data.data;
+      form.value.title = res.data.data.title;
+      form.value.language = res.data.data.language;
+      form.value.tagMask = res.data.data.tags;
+      form.value.content = res.data.data.content;
+      console.log(detail.value);
+    });
+  } else {
+    utils.tip('无数据', "error");
+  }
+});
 
 
 const optionsLanguages = store.state.article.articleLanguage.map(item => {
@@ -84,30 +99,6 @@ const optionTags = store.state.article.articleTag.map(item => {
     label: item.itemName,
   };
 });
-const sortord = ref(0);
-const emit = defineEmits(['sortord']);
-const ziChuanFu = () => {
-  emit('sortord', sortord.value);
-};
-const value = ref('名称');
-const options1 = ref([
-  {
-    value: 0,
-    label: '名称',
-  },
-  {
-    value: 1,
-    label: '最新',
-  },
-  {
-    value: 2,
-    label: '最热',
-  },
-]);
-const handleChange = value => {
-  sortord.value = value;
-  ziChuanFu();
-};
 
 const open = ref(false);
 const showDrawer = () => {
@@ -121,21 +112,24 @@ const showDrawer = () => {
       }, '是否恢复上次编辑的草稿？'),
       onOk() {
         form.value = JSON.parse(createData);
-        localStorage.removeItem('CreateArticle');
       },
       onCancel() {
         localStorage.removeItem('CreateArticle');
-        form.value.title = '';
-        form.value.language = '';
+        form.value.title = detail.value.title;
+        form.value.language = detail.value.language;
         form.value.isPublic = '';
-        form.value.tagMask = [];
+        form.value.tagMask = detail.value.tags;
         form.value.summary = '';
-        form.value.content = '';
+        form.value.content = detail.value.content;
       },
       class: 'test',
     });
   }
 };
+
+defineExpose({
+  showDrawer,
+});
 const onClose = () => {
   const isFormEmpty = computed(() => {
     return (
@@ -157,12 +151,12 @@ const onClose = () => {
         localStorage.setItem('CreateArticle', JSON.stringify(form.value));
       },
       onCancel() {
-        form.value.title = '';
-        form.value.language = '';
+        form.value.title = detail.value.title;
+        form.value.language = detail.value.language;
         form.value.isPublic = '';
-        form.value.tagMask = [];
+        form.value.tagMask = detail.value.tags;
         form.value.summary = '';
-        form.value.content = '';
+        form.value.content = detail.value.content;
       },
       class: 'test',
     });
@@ -178,18 +172,21 @@ const submit = () => {
     utils.tip('请填入必填项', "warning");
   } else {
     open.value = false;
-    api.articleApi.create(form.value).then(res => {
-      console.log(res);
-      utils.tip('创建成功', "success");
-      setTimeout(() => {
-        router.go(0);
-      }, 900); // 延迟1秒后刷新页面
+    api.articleApi.updata(form.value).then(res => {
+      if (res.data.success) {
+        console.log(res);
+        utils.tip('修改成功', "success");
+        setTimeout(() => {
+          router.go(0);
+        }, 900); // 延迟1秒后刷新页面
+      }
     });
   }
 
 };
 
 const form = ref({
+  id: updateId.value,
   title: '',
   language: '',
   isPublic: '',

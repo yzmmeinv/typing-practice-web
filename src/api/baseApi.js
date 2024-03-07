@@ -9,6 +9,9 @@ const baseApi = {
   getYzm(params) {
     return axios.post(`/base/get/yzm`, params);
   },
+  getDictionary(name) {
+    return axios.get(`/dict/getDictionary?name=${name}`);
+  },
 };
 
 export default baseApi;

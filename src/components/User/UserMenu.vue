@@ -1,60 +1,125 @@
 <template>
-  <a-menu id="dddddd" v-model:openKeys="openKeys" v-model:selectedKeys="selectedKeys" style="width: 256px" mode="inline"
-    :items="items" @click="handleClick"></a-menu>
+  <div class="userNavBar">
+    <div class="avatar">
+      <a-avatar v-if="isValidAvatar" :src="avatarSrc">
+      </a-avatar>
+      <a-avatar v-else>
+      </a-avatar>
+      <div>
+        {{ store.state.user.user.nickName }}
+      </div>
+    </div>
+    <div>
+      <a-menu style="width: 256px" mode="inline" :open-keys="state.openKeys" v-model:selectedKeys="state.selectedKeys"
+        @openChange="onOpenChange">
+        <a-sub-menu key="sub1">
+          <template #title>
+            <span>
+              <MailOutlined />
+              <span>用户信息</span>
+            </span>
+          </template>
+          <a-menu-item key="info">
+            <router-link :to="{ name: 'info' }">个人资料</router-link>
+          </a-menu-item>
+        </a-sub-menu>
+        <a-sub-menu key="sub2">
+          <template #title>
+            <span>
+              <AppstoreOutlined />
+              <span>文章管理</span>
+            </span>
+          </template>
+          <a-menu-item key="2">
+            <router-link :to="{ name: 'arlist' }">我创建的文章</router-link>
+          </a-menu-item>
+          <a-menu-item key="3">收到的通知</a-menu-item>
+        </a-sub-menu>
+        <a-sub-menu key="sub3">
+          <template #title>
+            <span>
+              <SettingOutlined />
+              <span>成绩管理</span>
+            </span>
+          </template>
+          <a-menu-item key="4">
+            <router-link :to="{ name: 'grades' }">成绩列表</router-link>
+          </a-menu-item>
+        </a-sub-menu>
+      </a-menu>
+    </div>
+    <div class="logout">
+      <a-button type="primary" danger @click="showConfirm">退出登录</a-button>
+    </div>
+  </div>
 </template>
 
-<script>
-import { reactive, ref, watch, h } from 'vue';
-import { MailOutlined, AppstoreOutlined, SettingOutlined } from '@ant-design/icons-vue';
-export default {
-  name: 'UserMenu',
-  components: {
-  },
-  setup() {
-    const selectedKeys = ref(['1']);
-    const openKeys = ref(['sub1']);
-    function getItem(label, key, icon, children, type) {
-      return {
-        key,
-        icon,
-        children,
-        label,
-        type,
-      };
-    }
-    const items = reactive([
-      getItem('Navigation One', 'sub1', () => h(MailOutlined), [
-        getItem('Item 1', 'g1', null, [getItem('Option 1', '1'), getItem('Option 2', '2')], 'group'),
-        getItem('Item 2', 'g2', null, [getItem('Option 3', '3'), getItem('Option 4', '4')], 'group'),
-      ]),
-      getItem('Navigation Two', 'sub2', () => h(AppstoreOutlined), [
-        getItem('Option 5', '5'),
-        getItem('Option 6', '6'),
-        getItem('Submenu', 'sub3', null, [getItem('Option 7', '7'), getItem('Option 8', '8')]),
-      ]),
+<script setup>
+import { reactive, createVNode } from 'vue';
+import { MailOutlined, AppstoreOutlined, SettingOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { Modal } from 'ant-design-vue';
+
+const store = useStore();
+const router = useRouter();
+
+const avatarNumber = store.state.user.user.avatar;
+const isValidAvatar = ['1', '2', '3', '4'].includes(avatarNumber);
+const avatarSrc = isValidAvatar ? require(`@/assets/images/avatar/${avatarNumber}.jpg`) : null;
+
+const logout = () => {
+  store.dispatch("logout");
+  router.push({ name: 'home' });
+};
+
+const showConfirm = () => {
+  Modal.confirm({
+    title: '退出登录?',
+    icon: createVNode(ExclamationCircleOutlined),
+    content: createVNode(
+      'div',
       {
-        type: 'divider',
+        style: 'color:red;',
       },
-      getItem('Navigation Three', 'sub4', () => h(SettingOutlined), [
-        getItem('Option 9', '9'),
-        getItem('Option 10', '10'),
-        getItem('Option 11', '11'),
-        getItem('Option 12', '12'),
-      ]),
-      getItem('Group', 'grp', null, [getItem('Option 13', '13'), getItem('Option 14', '14')], 'group'),
-    ]);
-    const handleClick = e => {
-      console.log('click', e);
-    };
-    watch(openKeys, val => {
-      console.log('openKeys', val);
-    });
-    return {
-      selectedKeys,
-      openKeys,
-      items,
-      handleClick,
-    };
+      '是否要退出登录',
+    ),
+    onOk() {
+      logout();
+    },
+    class: 'test',
+  });
+};
+const state = reactive({
+  rootSubmenuKeys: ['sub1', 'sub2', 'sub3'],
+  openKeys: ['sub1'],
+  selectedKeys: [],
+});
+const onOpenChange = openKeys => {
+  const latestOpenKey = openKeys.find(key => state.openKeys.indexOf(key) === -1);
+  if (state.rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
+    state.openKeys = openKeys;
+  } else {
+    state.openKeys = latestOpenKey ? [latestOpenKey] : [];
   }
 };
 </script>
+
+<style scoped>
+.logout {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.avatar {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.avatar .ant-avatar {
+  width: 5rem;
+  height: 5rem;
+  margin: 20px 0 10px 0;
+}
+</style>

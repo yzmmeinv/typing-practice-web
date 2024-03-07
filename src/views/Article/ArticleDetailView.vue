@@ -26,7 +26,11 @@
                 字数：{{ detail.wordNums }}
               </span>
               <span>
-                分类：{{ detail.tags }}
+                分类：
+                <span v-for="index in detail.tags" :key="index" class="tags">
+                  {{ getItemNameByCode("articleTag", index) }}
+                  <!-- {{ index }} -->
+                </span>
               </span>
             </div>
           </a-col>
@@ -77,6 +81,7 @@ import { useRoute } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import api from '@/api';
 import { useDebounce } from '@/api/utils/debounce';
+import getItemNameByCode from '../../api/utils/getItemNameByCode';
 
 const route = useRoute();
 const detail = ref({});
@@ -103,9 +108,7 @@ const toggleStar = debounce(() => {
     detail.value.packs--;
   }
   // 在这里可以发送收藏请求，将收藏状态同步到服务器
-  const formdata = new FormData();
-  formdata.append("articleId", detail.value.id);
-  api.articleApi.star(formdata).then(res => {
+  api.articleApi.star(detail.value.id).then(res => {
     console.log(res);
   });
   console.log('按钮被点击了！');
@@ -121,9 +124,9 @@ const toggleLike = debounce(() => {
     detail.value.stars--;
   }
   // 在这里可以发送点赞请求，将点赞状态同步到服务器
-  const formdata = new FormData();
-  formdata.append("articleId", detail.value.id);
-  api.articleApi.like(formdata).then(res => {
+  // const formdata = new FormData();
+  // formdata.append("articleId", detail.value.id);
+  api.articleApi.like(detail.value.id).then(res => {
     console.log(res);
   });
   console.log('按钮被点击了！');
@@ -192,8 +195,15 @@ const footerStyle = {
   color: #999;
 }
 
+.star span {
+  margin: 0;
+}
 
 button {
   margin-right: 0.6rem;
+}
+
+.info .tags {
+  margin-right: 5px;
 }
 </style>

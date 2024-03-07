@@ -4,13 +4,11 @@
  */
 import axios from 'axios';
 import router from '../../router';
-// import { useStore } from 'vuex';
 import store from '../../store/index';
 import baseUrl from '../base';
 import utils from './componentUtil';
 
 
-// const store = useStore();
 // 环境的切换
 if (process.env.NODE_ENV == 'development') {
   axios.defaults.baseURL = baseUrl.devUrl;
@@ -23,9 +21,11 @@ if (process.env.NODE_ENV == 'development') {
 // 创建axios实例
 var instance = axios.create({
   timeout: 1000 * 12,
+  headers: {
+    'Accept': '*/*',
+    'Content-Type': 'application/json;charset=UTF-8'
+  }
 });
-// 设置post请求头
-instance.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 
 /** 
  * 请求拦截器 
@@ -33,13 +33,8 @@ instance.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8
  */
 instance.interceptors.request.use(
   config => {
-    // 登录流程控制中，根据本地是否存在token判断用户的登录情况        
-    // 但是即使token存在，也有可能token是过期的，所以在每次的请求头中携带token        
-    // 后台根据携带的token判断用户的登录情况，并返回给我们对应的状态码        
-    // 而后我们可以在响应拦截器中，根据状态码进行一些统一的操作。
 
     const access = store.state.user.access;
-    console.log("httpUtil:", access);
     access && (config.headers.ACCESS = access);
     return config;
   },
@@ -50,35 +45,15 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   // 请求成功
   res => {
-    console.log(res);
     if (!res.data.success) {
-      console.log("请求失败");
-      console.log(res.data.code);
       switch (res.data.code) {
         case '-10002':
-          console.log("access过期。。。");
           // token过期,重新获取后请求
-          // todo 刷新token
-          store.dispatch('refreshAccess', {
-            refresh: store.state.user.refresh
-          }).then(refreshResponse => {
-            console.log('令牌刷新成功', refreshResponse);
-            // 重新发送请求
-            return instance.request(res.config);
-          })
-            .catch(refreshError => {
-              console.log('令牌刷新失败', refreshError);
-              // 处理令牌刷新失败
-              toLogin(); // 例如，跳转到登录页
-            });
-          break;
-        // 如果返回refreshtoken也过期了, 跳转重新登录
+          return refreshTokenAndResendRequest(res);
         case "-10003":
-          // 权限不足, 需要登录
           toLogin();
           break;
         default:
-          // 弹框 将结果的message输出
           utils.tip(res.data.message, "error");
           return res;
       }
@@ -159,11 +134,33 @@ instance.interceptors.response.use(
     //   return Promise.reject(error);
     // }
     // return Promise.reject(error);
-  }
+  },
   // }
 );
 
-
+async function refreshTokenAndResendRequest(res) {
+  try {
+    const _config = { ...res.config };
+    await store.dispatch('refreshAccess', {
+      refresh: store.state.user.refresh
+    });
+    const access = store.state.user.access;
+    access && (res.config.headers.ACCESS = access);
+    // 创建新的 Axios 实例
+    const newInstance = axios.create({
+      timeout: 1000 * 12,
+      headers: {
+        'Content-Type': 'multipart/form-data;charest=UTF-8',
+        'Cache-Control': 'no-cache',
+        'ACCESS': access
+      }
+    });
+    const newRequest = await newInstance.request(_config);
+    return newRequest;
+  } catch (error) {
+    toLogin();
+  }
+}
 
 /** 
  * 跳转登录页

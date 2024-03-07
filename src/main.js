@@ -13,3 +13,6 @@ app.use(index);
 // Vue.prototype.$api = index; // 将api挂载到vue的原型上
 
 app.mount('#app');
+// 在应用初始化时触发获取字典数据的操作
+store.dispatch("fetchDictionary", "articleTag");
+store.dispatch("fetchDictionary", "articleLanguage");

@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-
 const routes = [
   {
     path: '/',
@@ -49,9 +48,19 @@ const routes = [
 
     children: [
       {
-        path: "/user/info",
+        path: "info",
         name: "info",
         component: () => import('../views/User/UserInfo.vue'),
+      },
+      {
+        path: "arlist",
+        name: "arlist",
+        component: () => import('../views/User/UserArticleList.vue'),
+      },
+      {
+        path: "grades",
+        name: "grades",
+        component: () => import('../views/User/UserGradesList.vue'),
       },
     ],
   },
@@ -61,5 +70,12 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 });
+
+// 在路由导航前触发获取字典数据的操作
+// router.beforeEach((to, from, next) => {
+//   store.dispatch("fetchDictionary", "articleTag").then(() => {
+//     next();
+//   });
+// });
 
 export default router;
