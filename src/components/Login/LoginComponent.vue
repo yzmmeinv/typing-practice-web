@@ -30,7 +30,7 @@
     </a-form>
   </a-card>
 </template>
-  
+
 <script>
 import { ref } from 'vue';
 import { reactive } from 'vue';
@@ -38,7 +38,7 @@ import { useStore } from 'vuex';
 import router from "@/router/index";
 import { message } from 'ant-design-vue';
 import api from '../../api/index.js';
-import utils from '../../api/utils/componentUtil';
+import utils from '../../api/utils/generalUtil';
 
 export default {
   name: 'LoginComponent',
@@ -82,6 +82,7 @@ export default {
       if (formState.user.email === '') {
         return;
       }
+      console.log(status.value);
       if (status.value === 1) {
         // 字符校验
         if (formState.user.password === '' || formState.user.password.length > 16 || formState.user.password.length < 8) {
@@ -104,6 +105,7 @@ export default {
           utils.tip('请输入验证码', "error");
           return;
         }
+        console.log(status.value);
         store.dispatch("loginByYzm", {
           email: formState.user.email,
           verifyCode: formState.user.code,
@@ -207,3 +209,4 @@ a {
   width: 11.5rem;
 }
 </style>
+../../api/utils/generalUtil.js

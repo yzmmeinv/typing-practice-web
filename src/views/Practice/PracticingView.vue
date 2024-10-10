@@ -74,7 +74,7 @@ import ModeOne from '../../components/Practice/ModeOne.vue';
 import api from '../../api';
 import { useStore } from 'vuex';
 import PracticeTimer from '../../components/Practice/PracticeTimer.vue';
-import utils from '../../api/utils/componentUtil';
+import utils from '../../api/utils/generalUtil';
 
 
 const defaultPercent = ref(0);
@@ -276,3 +276,4 @@ provide('inputContent', inputContent,);
   display: inline-block;
 }
 </style>
+../../api/utils/generalUtil

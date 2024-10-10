@@ -118,9 +118,9 @@ const ModuleUser = {
       });
     },
     loginByYzm(context, data) {
-      api.userApi.login({
+      api.userApi.loginByYzm({
         email: data.email,
-        password: data.password,
+        verifyCode: data.verifyCode,
       }).then(res => {
         if (res.data.success) {
           localStorage.setItem('access', res.data.data.access);
@@ -149,7 +149,6 @@ const ModuleUser = {
     getinfo(context, data) {
       api.userApi.getInfo()
         .then(res => {
-          console.log("获取用户信息：", res);
           if (res.data.success) {
             context.commit("setUser", res.data);
             localStorage.setItem('user', JSON.stringify(res.data.data));
@@ -158,7 +157,7 @@ const ModuleUser = {
             data.error(res);
           }
         });
-
+      context.dispatch("fetchDictionary", ["articleTag", "articleLanguage"]);
     },
     logout(context) {
       localStorage.removeItem("access");

@@ -19,7 +19,7 @@
 
 <script setup>
 import { ref, defineProps, watch, defineEmits, onMounted, provide } from 'vue';
-import utils from '../../api/utils/componentUtil';
+import utils from '../../api/utils/generalUtil';
 import api from '../../api';
 import AfterPracticeView from '../../views/Practice/AfterPracticeView.vue';
 import { ArrowLeftOutlined } from '@ant-design/icons-vue';
@@ -152,3 +152,4 @@ const columns = [
   cursor: pointer;
 }
 </style>
+../../api/utils/generalUtil
