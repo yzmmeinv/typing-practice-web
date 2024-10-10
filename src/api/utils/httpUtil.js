@@ -6,7 +6,7 @@ import axios from 'axios';
 import router from '../../router';
 import store from '../../store/index';
 import baseUrl from '../base';
-import utils from './componentUtil';
+import utils from './generalUtil';
 
 
 // 环境的切换
@@ -50,7 +50,7 @@ instance.interceptors.response.use(
         case '-10002':
           // token过期,重新获取后请求
           return refreshTokenAndResendRequest(res);
-        case "-10003":
+        case "-100021":
           toLogin();
           break;
         default:

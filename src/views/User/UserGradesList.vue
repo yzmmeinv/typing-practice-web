@@ -6,7 +6,7 @@
 import GradesTable from '../../components/User/GradesTable.vue';
 import api from '../../api';
 import { useStore } from 'vuex';
-import { ref } from 'vue';
+import { ref, inject } from 'vue';
 
 const store = useStore();
 const listData = ref();
@@ -15,9 +15,11 @@ const pageData = (value) => {
   page.value = value;
   query();
 };
+
+const userId = ref(inject('userId'));
 const query = () => {
   api.practiceApi.query({
-    userId: store.state.user.user.userId,
+    userId: userId.value ? userId.value : store.state.user.user.userId,
     scene: "0",
     page: {
       pageSize: page.value.pageSize,
@@ -29,8 +31,6 @@ const query = () => {
     }
   });
 };
-
-
 </script>
 
 <style scoped></style>

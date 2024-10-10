@@ -56,10 +56,10 @@
   </a-drawer>
 </template>
 <script setup>
-import { ref, computed, createVNode, defineExpose, defineProps, watch } from 'vue';
+import { ref, computed, createVNode, defineExpose, defineEmits, defineProps, watch } from 'vue';
 import api from '../../api';
-import utils from '@/api/utils/componentUtil';
-import router from '../../router';
+import utils from '@/api/utils/generalUtil';
+// import router from '../../router';
 import { useStore } from 'vuex';
 import { Modal } from 'ant-design-vue';
 
@@ -163,6 +163,7 @@ const onClose = () => {
   }
   open.value = false;
 };
+const emit = defineEmits(['refreshArticleList']);
 const submit = () => {
   if (form.value.title === '' ||
     form.value.language === '' ||
@@ -177,8 +178,8 @@ const submit = () => {
         console.log(res);
         utils.tip('修改成功', "success");
         setTimeout(() => {
-          router.go(0);
-        }, 900); // 延迟1秒后刷新页面
+          emit('refreshArticleList');
+        }, 500); // 延迟1秒后刷新页面
       }
     });
   }
