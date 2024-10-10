@@ -81,7 +81,7 @@ watch(() => props.rankList, (newrankList) => {
 const getAvatar = (rank) => {
   // 根据排名返回对应的头像 URL
   // 这里假设有一个函数根据排名获取对应的头像路径
-  return require(`@/assets/list/${rank}.png`);
+  return require(`@/assets/images/ranking/${rank}.png`);
 };
 </script>
 

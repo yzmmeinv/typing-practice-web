@@ -8,7 +8,7 @@
       <div class="filing">
         ©工信部备案：
         <a href="https://beian.miit.gov.cn" target="_blank">冀ICP备2023045812号-1</a><br>
-        <img src="./assets/batb.png">
+        <img src="./assets/images/batb.png">
         <a href="https://beian.mps.gov.cn/#/query/webSearch?code=13072202000097\" rel="noreferrer"
           target="_blank">冀公网安备13072202000097</a>
       </div>
@@ -47,11 +47,11 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background-image: url('./assets/images/background/1.jpg');
+  /* background-image: url('./assets/images/background/1.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  position: relative;
+  position: relative; */
 }
 
 .ant-card-body {
@@ -128,7 +128,7 @@ p {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.06);
   pointer-events: none;
   z-index: -1
 }
