@@ -8,25 +8,25 @@ import store from '../../store/index';
 import baseUrl from '../base';
 import utils from './generalUtil';
 
-
-// 环境的切换
-if (process.env.NODE_ENV == 'development') {
-  axios.defaults.baseURL = baseUrl.devUrl;
-} else if (process.env.NODE_ENV == 'debug') {
-  axios.defaults.baseURL = baseUrl.devUrl;
-} else if (process.env.NODE_ENV == 'production') {
-  axios.defaults.baseURL = baseUrl.prodUrl;
-}
-
 // 创建axios实例
-var instance = axios.create({
+const instance = axios.create({
   timeout: 1000 * 12,
   headers: {
     'Accept': '*/*',
     'Content-Type': 'application/json;charset=UTF-8'
   }
 });
+// 环境的切换
+if (process.env.NODE_ENV == 'development') {
+  instance.defaults.baseURL = baseUrl.devUrl;
+} else if (process.env.NODE_ENV == 'debug') {
+  instance.defaults.baseURL = baseUrl.devUrl;
+} else if (process.env.NODE_ENV == 'production') {
+  instance.defaults.baseURL = baseUrl.prodUrl;
+}
 
+
+const proxyAxios = axios.create();
 /** 
  * 请求拦截器 
  * 每次请求前，如果存在token则在请求头中携带token 
@@ -176,3 +176,4 @@ const toLogin = () => {
 };
 
 export default instance;
+export  {proxyAxios} ;
