@@ -1,9 +1,12 @@
-class Msg {
+export class Msg {
   constructor() {
     this.head = new Head();
     this.body = new Body();
     this.sender = new Sender();
   }
+  // toJSON() {
+  //   return JSON.stringify(this);
+  // }
 }
 
 class Head {
