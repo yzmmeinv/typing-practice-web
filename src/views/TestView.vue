@@ -29,6 +29,7 @@
 import { onBeforeUnmount, ref } from 'vue';
 import { useStore } from 'vuex';
 // import protobuf from 'protobufjs';
+import baseUrl from '@/api/base';
 import resProtoRoot from '../proto/resProto.js';
 import msgProtoRoot from '../proto/message.js';
 import { Msg } from '../js/Msg';
@@ -40,7 +41,6 @@ const store = useStore();
 let ws = null; // 用来保存 WebSocket 实例
 const messages = ref([]); // 用来保存收到的消息
 const newMessage = ref(''); // 保存输入框中的消息内容
-const address = 'localhost:3333';
 let wsStatus = ref('init'); // 连接状态：'init', 'connected', 'connecting', 'disconnected'
 let webSocketPingTimer = null; // 心跳定时器
 const webSocketPingTime = 9000; // 心跳的间隔，当前为9秒,
@@ -72,8 +72,6 @@ const decodeMessage = (buffer) => {
   return resType.toObject(message);
 };
 
-
-
 // 在组件卸载时关闭 WebSocket 连接
 onBeforeUnmount(() => {
   wsLogout();
@@ -82,7 +80,7 @@ onBeforeUnmount(() => {
 const connectWebSocket = () => {
   // todo 刷新access时机
   wsStatus.value = 'connecting'
-  ws = new WebSocket(`ws://${address}/ws?a=${store.state.user.access}`);
+  ws = new WebSocket(`${baseUrl.wsUrl}?a=${store.state.user.access}`);
   ws.onopen = handleOnOpen;
   ws.onclose = handleOnClose;
   ws.onmessage = handleOnMessage;

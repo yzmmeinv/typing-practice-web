@@ -47,7 +47,7 @@ const fetchImage = () => {
 
       // 延迟后将透明度设置为 1
       setTimeout(() => {
-        document.body.style.transition = 'opacity 10s ease-in-out'; // 设置过渡效果
+        document.body.style.transition = 'opacity 2s ease-in-out'; // 设置过渡效果
         document.body.style.opacity = '1'; // 渐变到完全显示
       }, 100);  // 延迟时间，以确保背景图片加载
     })

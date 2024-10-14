@@ -17,14 +17,7 @@ const instance = axios.create({
   }
 });
 // 环境的切换
-if (process.env.NODE_ENV == 'development') {
-  instance.defaults.baseURL = baseUrl.devUrl;
-} else if (process.env.NODE_ENV == 'debug') {
-  instance.defaults.baseURL = baseUrl.devUrl;
-} else if (process.env.NODE_ENV == 'production') {
-  instance.defaults.baseURL = baseUrl.prodUrl;
-}
-
+instance.defaults.baseURL = baseUrl.httpUrl;
 
 const proxyAxios = axios.create();
 /** 
