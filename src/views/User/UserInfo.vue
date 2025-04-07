@@ -8,9 +8,8 @@
           <span>点击更换头像</span>
         </template>
         <div style="position: relative; display: inline-block;" @click="showDrawer">
-          <a-avatar v-if="isValidAvatar" :src="avatarSrc" class="img">
+          <a-avatar :src="avatarSrc" class="img">
           </a-avatar>
-          <a-avatar v-else class="img"></a-avatar>
         </div>
       </a-tooltip>
       <p>用户名:</p><a-input v-model:value="user.nickName" :style="{ width: '250px' }" :readonly="!isEditable" />
@@ -59,8 +58,7 @@ const user = ref({ ...store.state.user.user });
 const gender = ref(user.value.gender?.toString());
 
 const avatarNumber = ref(store.state.user.user.avatar);
-const isValidAvatar = computed(() => ['1', '2', '3', '4'].includes(avatarNumber.value));
-const avatarSrc = computed(() => isValidAvatar.value ? require(`@/assets/images/avatar/${avatarNumber.value}.jpg`) : null);
+const avatarSrc = computed(() => utils.getAvatarSrc(avatarNumber.value));
 const avatarn = ref(store.state.user.user.avatar);
 const isEditable = computed(() => user.value.userId === store.state.user.user.userId);
 

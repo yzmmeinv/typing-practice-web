@@ -18,9 +18,7 @@
             <a-col :xs="24" :sm="24" :md="24" :lg="17" :xl="17" :offset="1">
               <div class="info">
                 <span @click="routeUserInfo(detail.authorId)" class="username">
-                  <a-avatar v-if="utils.isValidAvatar(detail.avatar)" :src="utils.getAvatarSrc(detail.avatar)">
-                  </a-avatar>
-                  <a-avatar v-else>
+                  <a-avatar :src="utils.getAvatarSrc(detail.avatar)">
                   </a-avatar>
                   {{ detail.authorName }}
                 </span>
@@ -107,12 +105,10 @@ let rankList = ref();
 const loadArticle = (articleId) => {
   api.articleApi.desc(articleId).then(res => {
     detail.value = res.data.data;
-    console.log(detail.value);
   });
   api.rankApi.getArticleRanking(articleId).then(res => {
     rankList.value = res.data.list;
   });
-  console.log("调用浏览页面接口");
   view(articleId);
 };
 
@@ -299,4 +295,3 @@ button {
   cursor: pointer;
 }
 </style>
-../../api/utils/dict
